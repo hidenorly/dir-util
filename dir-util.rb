@@ -58,7 +58,12 @@ options = {
 }
 
 OptionParser.new do |opts|
-	opts.banner = "Usage: targetDirectory [option]"
+	opts.banner = "Usage: [option]"
+
+	opts.on("-t", "--targetDirectory=", "Specify target path (default:#{options[:targetDirectory]})") do |targetDirectory|
+		targetDirectory = targetDirectory.to_s
+		options[:targetDirectory] = targetDirectory
+	end
 
 	opts.on("-o", "--sortOrder=", "Specify normal or reverse (default:#{options[:sortOrder]})") do |sortOrder|
 		sortOrder = sortOrder.to_s.downcase
