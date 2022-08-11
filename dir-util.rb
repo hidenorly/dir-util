@@ -53,6 +53,7 @@ options = {
 	:targetDirectory => ".",
 	:sortOrder => "normal",
 	:sortRule => "dir-name",
+	:scanRegExp => nil,
 	:numOutput => 1,
 	:outputMode => "relative",
 }
@@ -75,12 +76,17 @@ OptionParser.new do |opts|
 		options[:sortRule] = sortRule if sortRule == "file-name"
 	end
 
+	opts.on("-r", "--scanRegExp=", "Specify scan regexpression e.g. \"[0-9]+\"") do |scanRegExp|
+		scanRegExp = scanRegExp.to_s
+		options[:scanRegExp] = scanRegExp
+	end
+
 	opts.on("-n", "--numOutput=", "Specify the number of output result (default:#{options[:numOutput]})") do |numOutput|
 		numOutput = numOutput.to_i
 		options[:numOutput] = numOutput if numOutput>0
 	end
 
-	opts.on("-m", "--outputMode=", "Specify relative or full (default:#{options[:outputMode]})") do |outputMode|
+	opts.on("-m", "--outputMode=", "Specify output mode: relative or full (default:#{options[:outputMode]})") do |outputMode|
 		outputMode = outputMode.to_s.downcase
 		options[:outputMode] = outputMode if outputMode == "full"
 	end
@@ -88,7 +94,7 @@ end.parse!
 
 
 result = []
-FileUtil.iteratePath( options[:targetDirectory], nil, result, false, ( options[:sortRule] == "dir-name" ) )
+FileUtil.iteratePath( options[:targetDirectory], options[:scanRegExp], result, false, ( options[:sortRule] == "dir-name" ) )
 
 if options[:sortOrder] == "reverse" then
 	result = result.sort{|a,b| b<=>a}
