@@ -83,7 +83,7 @@ OptionParser.new do |opts|
 
 	opts.on("-n", "--numOutput=", "Specify the number of output result (default:#{options[:numOutput]})") do |numOutput|
 		numOutput = numOutput.to_i
-		options[:numOutput] = numOutput if numOutput>0
+		options[:numOutput] = numOutput
 	end
 
 	opts.on("-m", "--outputMode=", "Specify output mode: relative or full (default:#{options[:outputMode]})") do |outputMode|
@@ -105,6 +105,7 @@ end
 n = 0
 expandPath = options[:outputMode] == "full"
 result.each do |aResult|
+	break if n == options[:numOutput]
 	if expandPath then
 		aResult = File.expand_path( aResult )
 	else
@@ -112,5 +113,4 @@ result.each do |aResult|
 	end
 	puts aResult
 	n = n + 1
-	break if n == options[:numOutput]
 end
