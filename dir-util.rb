@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 #  Copyright (C) 2022 hidenorly
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,18 +54,20 @@ options = {
 	:targetDirectory => ".",
 	:sortOrder => "normal",
 	:sortRule => "dir-name",
-	:scanRegExp => nil,
 	:numOutput => 1,
 	:outputMode => "relative",
+	:filterMatch => nil
 }
 
 OptionParser.new do |opts|
-	opts.banner = "Usage: [option]"
+	opts.banner = "Usage: targetDirectory [option]"
+
 
 	opts.on("-t", "--targetDirectory=", "Specify target path (default:#{options[:targetDirectory]})") do |targetDirectory|
 		targetDirectory = targetDirectory.to_s
 		options[:targetDirectory] = targetDirectory
 	end
+
 
 	opts.on("-o", "--sortOrder=", "Specify normal or reverse (default:#{options[:sortOrder]})") do |sortOrder|
 		sortOrder = sortOrder.to_s.downcase
@@ -76,25 +79,24 @@ OptionParser.new do |opts|
 		options[:sortRule] = sortRule if sortRule == "file-name"
 	end
 
-	opts.on("-r", "--scanRegExp=", "Specify scan regexpression e.g. \"[0-9]+\"") do |scanRegExp|
-		scanRegExp = scanRegExp.to_s
-		options[:scanRegExp] = scanRegExp
-	end
-
 	opts.on("-n", "--numOutput=", "Specify the number of output result (default:#{options[:numOutput]})") do |numOutput|
 		numOutput = numOutput.to_i
-		options[:numOutput] = numOutput
+		options[:numOutput] = numOutput if numOutput>0
 	end
 
 	opts.on("-m", "--outputMode=", "Specify output mode: relative or full (default:#{options[:outputMode]})") do |outputMode|
 		outputMode = outputMode.to_s.downcase
 		options[:outputMode] = outputMode if outputMode == "full"
 	end
+
+        opts.on("-f", "--filterMatch=", "Specify regexp match condition (default:#{options[:filterMatch]})") do |filterMatch|
+                options[:filterMatch] = filterMatch
+        end
 end.parse!
 
 
 result = []
-FileUtil.iteratePath( options[:targetDirectory], options[:scanRegExp], result, false, ( options[:sortRule] == "dir-name" ) )
+FileUtil.iteratePath( options[:targetDirectory], options[:filterMatch], result, false, ( options[:sortRule] == "dir-name" ) )
 
 if options[:sortOrder] == "reverse" then
 	result = result.sort{|a,b| b<=>a}
@@ -105,7 +107,6 @@ end
 n = 0
 expandPath = options[:outputMode] == "full"
 result.each do |aResult|
-	break if n == options[:numOutput]
 	if expandPath then
 		aResult = File.expand_path( aResult )
 	else
@@ -113,4 +114,5 @@ result.each do |aResult|
 	end
 	puts aResult
 	n = n + 1
+	break if n == options[:numOutput]
 end
