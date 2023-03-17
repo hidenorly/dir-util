@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#  Copyright (C) 2022 hidenorly
+#  Copyright (C) 2022, 2023 hidenorly
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,19 +55,19 @@ options = {
 	:sortOrder => "normal",
 	:sortRule => "dir-name",
 	:numOutput => 1,
+	:numOfSkip => 0,
 	:outputMode => "relative",
+	:separator => "\n",
 	:filterMatch => nil
 }
 
 OptionParser.new do |opts|
 	opts.banner = "Usage: targetDirectory [option]"
 
-
 	opts.on("-t", "--targetDirectory=", "Specify target path (default:#{options[:targetDirectory]})") do |targetDirectory|
 		targetDirectory = targetDirectory.to_s
 		options[:targetDirectory] = targetDirectory
 	end
-
 
 	opts.on("-o", "--sortOrder=", "Specify normal or reverse (default:#{options[:sortOrder]})") do |sortOrder|
 		sortOrder = sortOrder.to_s.downcase
@@ -84,6 +84,11 @@ OptionParser.new do |opts|
 		options[:numOutput] = numOutput if numOutput>0
 	end
 
+	opts.on("-k", "--numOfSkip=", "Specify the number of output result (default:#{options[:numOfSkip]})") do |numOfSkip|
+		numOfSkip = numOfSkip.to_i
+		options[:numOfSkip] = numOfSkip if numOfSkip>=0
+	end
+
 	opts.on("-m", "--outputMode=", "Specify output mode: relative or full (default:#{options[:outputMode]})") do |outputMode|
 		outputMode = outputMode.to_s.downcase
 		options[:outputMode] = outputMode if outputMode == "full"
@@ -91,6 +96,10 @@ OptionParser.new do |opts|
 
         opts.on("-f", "--filterMatch=", "Specify regexp match condition (default:#{options[:filterMatch]})") do |filterMatch|
                 options[:filterMatch] = filterMatch
+        end
+
+        opts.on("-r", "--separator=", "Specify separor such as \" \" or \",\" or \"\\n\"") do |separator|
+                options[:separator] = separator
         end
 end.parse!
 
@@ -112,7 +121,7 @@ result.each do |aResult|
 	else
 		aResult = FileUtil.getSimplifiedPath( aResult )
 	end
-	puts aResult
+	print "#{aResult}#{options[:separator]}" if n >= options[:numOfSkip]
 	n = n + 1
 	break if n == options[:numOutput]
 end
